@@ -4,7 +4,7 @@ import asyncio
 import requests
 
 from tavily import TavilyClient, AsyncTavilyClient
-from open_deep_research.state import Section
+from state import Section
 from langsmith import traceable
 
 tavily_client = TavilyClient()
@@ -82,6 +82,33 @@ Content:
 
 """
     return formatted_str
+
+
+@traceable
+async def browser_user_search_async(search_queries):
+    async def _agent_call(_query):
+        url = os.getenv('BROWSER_USE_AGENT_SVC')
+        headers = {
+            'Authorization': os.getenv('BROWSER_USE_AGENT_SVC_AUTH_TOKEN')
+        }
+        data = {"query": _query, 'deep_search': False}
+        response = requests.post(url, headers=headers, json=data)
+        response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
+        api_response = response.json()  # Assuming the response is in JSON format
+        return api_response['observation']['result']
+
+    search_tasks = []
+    for query in search_queries:
+        search_tasks.append(
+            _agent_call(
+                query
+            )
+        )
+
+    # Execute all searches concurrently
+    search_docs = await asyncio.gather(*search_tasks)
+
+    return "\n\n".join(search_docs)
 
 @traceable
 async def tavily_search_async(search_queries):
