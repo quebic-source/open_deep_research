@@ -1,5 +1,4 @@
 from typing import Literal
-
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain.chat_models import init_chat_model
 from langchain_core.runnables import RunnableConfig
@@ -85,6 +84,7 @@ async def generate_report_plan(state: ReportState, config: RunnableConfig):
 
     return {"sections": sections}
 
+
 def human_feedback(state: ReportState, config: RunnableConfig) -> Command[Literal["generate_report_plan","build_section_with_web_research"]]:
     """ Get feedback on the report plan """
 
@@ -162,6 +162,9 @@ async def search_web(state: SectionState, config: RunnableConfig):
     if search_api == "tavily":
         search_results = await tavily_search_async(query_list)
         source_str = deduplicate_and_format_sources(search_results, max_tokens_per_source=5000, include_raw_content=True)
+        # print('!!!query_list', query_list)
+        # print('!!!search_results', search_results)
+        # print('!!!search_results', source_str)
     elif search_api == "perplexity":
         search_results = perplexity_search(query_list)
         source_str = deduplicate_and_format_sources(search_results, max_tokens_per_source=5000, include_raw_content=False)

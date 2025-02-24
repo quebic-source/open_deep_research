@@ -1,0 +1,9 @@
+venv
+env
+test_env
+.env
+__pycache__
+.idea
+answered_questions*
+test_files/
+test/agent.log
